@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
@@ -19,21 +18,11 @@ import androidx.compose.ui.unit.dp
 
 @Stable
 class EarthquakeState {
-
     var isShaking by mutableStateOf(false)
     var earthquakeDuration by mutableStateOf(2000L)
     var shakesPerSecond by mutableStateOf(10)
     var shakeForce by mutableStateOf(10)
-
 }
-
-@Immutable
-data class EarthquakeProperties(
-    val mover: IEarthquakeMover,
-    val controller: IEarthquakeController,
-    val state: EarthquakeState,
-    val scope: IEarthquakeScope
-)
 
 @Composable
 fun EarthquakeBox(
@@ -42,12 +31,11 @@ fun EarthquakeBox(
 ) {
     val coroutineScope = rememberCoroutineScope()
 
-    val earthquake = remember {
-        val mover = EarthquakeMover()
-        val state = EarthquakeState()
-        val scope = EarthquakeScope(state = state)
-
-        val controller = EarthquakeController(
+    val state = remember { EarthquakeState() }
+    val scope = remember { EarthquakeScope(state = state) }
+    val mover = remember { EarthquakeMover() }
+    val controller = remember {
+        EarthquakeController(
             scope = coroutineScope,
             mover = mover,
             onEarthquakeFinished = {
@@ -55,34 +43,27 @@ fun EarthquakeBox(
                 onEarthquakeFinished()
             }
         )
-
-        EarthquakeProperties(
-            mover = mover,
-            controller = controller,
-            state = state,
-            scope = scope
-        )
     }
 
-    LaunchedEffect(earthquake.state.isShaking) {
-        if (earthquake.state.isShaking) {
-            earthquake.controller.startShaking(
-                earthquakeDuration = earthquake.state.earthquakeDuration,
-                shakeDuration = 1000L / earthquake.state.shakesPerSecond,
-                shakeForce = earthquake.state.shakeForce
+    LaunchedEffect(state.isShaking) {
+        if (state.isShaking) {
+            controller.startShaking(
+                earthquakeDuration = state.earthquakeDuration,
+                shakeDuration = 1000L / state.shakesPerSecond,
+                shakeForce = state.shakeForce
             )
         } else {
-            earthquake.controller.stopShaking()
+            controller.stopShaking()
         }
     }
 
     Box(
         modifier = Modifier
-            .alpha(earthquake.mover.alpha.value)
-            .offset(earthquake.mover.x.value.dp, earthquake.mover.y.value.dp)
-            .rotate(earthquake.mover.rotation.value)
-            .padding(earthquake.state.shakeForce.dp)
+            .alpha(mover.alpha.value)
+            .offset(mover.x.value.dp, mover.y.value.dp)
+            .rotate(mover.rotation.value)
+            .padding(state.shakeForce.dp)
     ) {
-        earthquake.scope.content()
+        scope.content()
     }
 }

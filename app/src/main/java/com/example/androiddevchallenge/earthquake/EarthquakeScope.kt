@@ -11,7 +11,7 @@ interface IEarthquakeScope {
 
 class EarthquakeScope(private val state: EarthquakeState) : IEarthquakeScope {
     override fun startShaking() {
-        if (!state.isShaking)
+        if (!state.isShaking && state.earthquakeDuration > 0)
             state.isShaking = true
     }
 
