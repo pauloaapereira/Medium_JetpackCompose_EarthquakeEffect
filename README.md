@@ -7,7 +7,7 @@
 </p>
 
 ## Description
-Did you ever think how would it be your UI when there is an earthquake?
+Did you ever think how would your UI behave when there is an earthquake?
 Well… I can show you!
 
 image
